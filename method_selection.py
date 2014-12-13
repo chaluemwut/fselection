@@ -1,6 +1,41 @@
 from numpy import *
 import pylab as pl
 from sklearn.feature_selection import *
+from sklearn.cross_validation import KFold
+from sklearn.metrics import mean_squared_error
+from sklearn import svm
+
+default_k = 4
+
+class ToolUtil(object):
+	def __init__(self):
+		pass
+
+	def simple_plot(self, x, k):
+
+		lst = []
+		counter = 0;
+		for i in range(0, len(x)):
+			b = 0 in x[i]
+			less100 = [xi for xi in x[i] if xi > 10]
+			if b != False and len(less100) == 0:
+				counter+=1
+				if counter > k:
+					break
+				lst.append(x[i])
+		for j in range(0, len(lst)):
+			pl.plot(lst[j])
+		base_x = 0.80
+		base_y = 0.76			
+		pl.figtext(base_y, base_x-0.05*0, '0 - location')
+		pl.figtext(base_y, base_x-0.05*1, '1 - shares')
+		pl.figtext(base_y, base_x-0.05*2, '2 - comments')
+		pl.figtext(base_y, base_x-0.05*3, '3 - like')
+		pl.figtext(base_y, base_x-0.05*4, '4 - vdo')
+		pl.figtext(base_y, base_x-0.05*5, '5 - images')
+		pl.figtext(base_y, base_x-0.05*6, '6 - url')
+		pl.figtext(base_y, base_x-0.05*7, '7 - tags')
+		pl.show()
 
 
 class BaseMethod(object):
@@ -39,8 +74,34 @@ class BruteForce(BaseMethod):
 		self.x = x
 		self.y = y
 
-	def process(self):
+	def process(self, k_num=default_k):
 		print 'start brute'
+		cv_errors = []
+		kfold = KFold(len(self.x), n_folds=10)
+		nfeatures = range(0, 8)
+		x_tran = transpose(self.x)
+		x_r=[]
+		for nfeature in nfeatures:
+			rmses = []
+			x_r.append(x_tran[nfeature])
+			x_select = transpose(x_r)
+			for train, test in kfold:
+				xtrain, ytrain, xtest, ytest = x_select[train], self.y[train], x_select[test], self.y[test]
+				clf = svm.SVC()
+				clf.fit(xtrain, ytrain)
+				ypred = clf.predict(xtest)
+				rmses.append(sqrt(mean_squared_error(ypred, ytest)))
+			cv_errors.append(mean(rmses))
+		fig = pl.figure()
+		ax = fig.add_subplot(111)
+		pl.plot(nfeatures, cv_errors)
+		for xy in zip(nfeatures,cv_errors):
+			ax.annotate('(%s, %s)' % xy, xy=xy, textcoords='offset points')
+		pl.title('Brute force')
+		pl.show()
+
+
+
 
 class Chi2(BaseMethod):
 

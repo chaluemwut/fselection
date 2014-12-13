@@ -6,25 +6,27 @@ def load_data():
 	y = loadtxt('fresult.txt', dtype=int)
 	return x,y
 
-myopts, args = getopt.getopt(sys.argv[1:],"m:k:")
+myopts, args = getopt.getopt(sys.argv[1:],"m:k:t")
 m_arg = ''
 k_arg = 0
+simple_plot = ''
 for o, a in myopts:
     if o == '-m':
         m_arg=a
     elif o == '-k':
         k_arg=int(a)
+    elif o == '-t':
+    	simple_plot='sp'
     else:
         print("Usage: %s -i input -o output" % sys.argv[0])
-# try :
-# 	arg = sys.argv[1]
-# 	k_num = int(sys.argv[2])
-# except Exception, e:
-# 	arg = ''
-# 	k_num = 0
 
 print 'start'
 x,y = load_data()
+if simple_plot == 'sp':
+	tool = ToolUtil()
+	tool.simple_plot(x, 20)
+	quit()
+
 if m_arg == 'chi2':
 	method = Chi2(x, y)
 elif m_arg == 'bf':
