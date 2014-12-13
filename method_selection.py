@@ -48,9 +48,9 @@ class Chi2(BaseMethod):
 		self.x = x
 		self.y = y
 
-	def process(self):
+	def process(self, k_num=4):
 		print 'start chi2'
-		x_new = SelectKBest(chi2, k=4).fit_transform(self.x ,self.y)
+		x_new = SelectKBest(chi2, k=k_num).fit_transform(self.x ,self.y)
 		np_x, np_x_new = self.transpose_array(self.x, x_new)
 		i_select = self.get_select(np_x, np_x_new)
 
