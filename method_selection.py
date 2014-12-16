@@ -1,9 +1,10 @@
 from numpy import *
 import pylab as pl
 from sklearn.feature_selection import *
-from sklearn.cross_validation import KFold
+from sklearn.cross_validation import *
 from sklearn.metrics import mean_squared_error
 from sklearn import svm
+import itertools
 
 default_k = 4
 
@@ -67,12 +68,71 @@ class BaseMethod(object):
 		np_x_new = array(x_new)
 		np_x_new = np_x_new.transpose()
 		return np_x, np_x_new
+	
+	def add_label(self, feature_result, min_feature_label):
+		base_x = 0.88
+		base_y = 0.74
+		for i in range(0, len(feature_result)):
+			x1 = feature_result[i]
+			x2 = min_feature_label[i]
+			pl.figtext(base_y, base_x-0.05*i, '{} -> [{}]'.format(x1, x2))
+			
 
 class BruteForce(BaseMethod):
+	feature_lst = '01234567'
 
-	def __init__(self, x, y):
+
+	def __init__(self, x=None, y=None):
 		self.x = x
 		self.y = y
+
+	def compute_selection(self, range_method):
+		rmses = {}
+		for i in range_method:
+			print i
+			lst = list(itertools.combinations(self.feature_lst, i))
+			rmses_i = []
+			rmses_feature = []
+			for f_select in lst:
+				x_tran = transpose(self.x)
+				i_feature = [int(x) for x in list(f_select)]
+				x_feature = transpose(x_tran[i_feature])
+				x_train, x_test, y_train, y_test = train_test_split(x_feature, self.y, test_size=0.3, random_state=0)				
+				clf = svm.SVC()
+				clf.fit(x_train, y_train)
+				ypred = clf.predict(x_test)
+				rmses_i.append(sqrt(mean_squared_error(ypred, y_test)))
+				rmses_feature.append(f_select)				
+			rmses_min = min(rmses_i)
+			r_index = rmses_i.index(rmses_min)
+			rmses[rmses_feature[r_index]] = rmses_i[r_index]
+		return rmses
+	
+	def plot_rmse(self, rmses, title_msg):
+		min_result = [None]*8
+		min_feature_label = [None]*8
+		for key in rmses.keys():
+			min_result[len(key)-1] = round(rmses[key], 3)
+			min_feature_label[len(key)-1] = ','.join(key)
+		fig = pl.figure()
+		ax = fig.add_subplot(111)
+		feature_result = list(range(1, 9))
+		for xy in zip(feature_result, min_result):
+			ax.annotate('(%s, %s)' % xy, xy=xy, textcoords='offset points')
+		pl.title(title_msg)
+		self.add_label(feature_result, min_feature_label)
+		pl.plot(feature_result, min_result)
+		pl.show()		
+			
+	def forward(self):
+		print 'Forward'
+		rmses = self.compute_selection(range(1,9))
+		self.plot_rmse(rmses, 'Feature selection : Forward')
+
+	def backward(self):
+		print 'Back ward'
+		rmses = self.compute_selection(range(8, 0, -1))
+		self.plot_rmse(rmses, 'Feature selection : Backward')
 
 	def process(self, k_num=default_k):
 		print 'start brute'
@@ -99,8 +159,6 @@ class BruteForce(BaseMethod):
 			ax.annotate('(%s, %s)' % xy, xy=xy, textcoords='offset points')
 		pl.title('Brute force')
 		pl.show()
-
-
 
 
 class Chi2(BaseMethod):
@@ -158,3 +216,11 @@ class Chi2(BaseMethod):
 			pl.figtext(base_y, base_x-0.05*7, '7 - tags')
 		pl.show()
 
+def load_data():
+	x = loadtxt('fselect.txt', delimiter=',', dtype=int)
+	y = loadtxt('fresult.txt', dtype=int)
+	return x,y
+
+x,y = load_data()
+bf = BruteForce(x, y)
+bf.backward()
