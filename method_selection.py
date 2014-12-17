@@ -168,6 +168,9 @@ class BruteForce(BaseMethod):
 			range_method = range(8, 0, -1)
 
 		rmse = self.compute_selection(range_method)
+		v_rmse = rmse.values()
+		min_rmse = min(v_rmse)
+		i_rmse = v_rmse.index(min_rmse)
 		print 'k : ', k
 		print rmse
 
