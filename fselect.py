@@ -49,10 +49,10 @@ elif m_arg == 'bf':
 	method = BruteForce(x, y)
 
 if create == 'forward':
-	method.create_new_model('forward', k_arg)
+	method.create_new_model('forward')
 	exit()
 elif create == 'backward':
-	method.create_new_model('backward', k_arg)
+	method.create_new_model('backward')
 	exit()
 elif create == 'chi2':
 	method.create_new_model(k_arg)

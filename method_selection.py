@@ -160,19 +160,40 @@ class BruteForce(BaseMethod):
 		pl.title('Brute force')
 		pl.show()
 
-	def create_new_model(self, mtype, k):
+	def create_new_model(self, mtype):
 		range_method = ''
 		if mtype == 'forward':
 			range_method = range(1, 9)
 		else:
 			range_method = range(8, 0, -1)
 
-		rmse = self.compute_selection(range_method)
+		rmse = {('2', '3'): 2.998908694034462, ('1', '2', '3', '6'): 2.9824911873277555, ('0', '1', '2', '3', '4', '6', '7'): 3.1242675082609561, ('2', '3', '7'): 2.972872439257729, ('2', '3', '4', '6', '7'): 3.0894996655293645, ('2',): 3.564004441576142, ('1', '2', '3', '4', '6', '7'): 3.0818087234906884, ('0', '1', '2', '3', '4', '5', '6', '7'): 3.2440301459082304}
+
 		v_rmse = rmse.values()
+		key_rmse = rmse.keys()
 		min_rmse = min(v_rmse)
-		i_rmse = v_rmse.index(min_rmse)
-		print 'k : ', k
-		print rmse
+		index_min = v_rmse.index(min_rmse)
+		feature = key_rmse[index_min]
+		feature_list = [int(x) for x in list(feature)]
+		feature_tran = transpose(self.x)
+		f_temp = feature_tran[feature_list]
+		f_select = transpose(f_temp)
+		print list(f_select)
+		# pl.plot(list(f_select), list(range(0,4)))
+		# pl.show()
+		# print list(f_select)[0][0]
+		# print len(feature_tran)
+
+		# f_select = transpose(feature_tran[feature_list])
+		# x_ax = list(range(0, len(feature_list)))
+		# print 'select ', len(f_select[0]), ' x ', x_ax
+		# pl.plot(f_select, x_ax)
+		# pl.show()
+		# print 'fe', f_select
+		# print feature_list
+		# print feature_list
+		# print 'min : ', min_rmse, ' i : ',i_rmse
+		# print rmse
 
 
 
