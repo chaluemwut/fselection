@@ -5,8 +5,10 @@ from sklearn.cross_validation import *
 from sklearn.metrics import mean_squared_error
 from sklearn import svm
 import itertools
+from googleapiclient.model import BaseModel
 
 default_k = 4
+all_feature = array(['location', 'shares', 'comments', 'like', 'vdo', 'images', 'url', 'tags'])
 
 class ToolUtil(object):
 	def __init__(self):
@@ -76,8 +78,32 @@ class BaseMethod(object):
 			x1 = feature_result[i]
 			x2 = min_feature_label[i]
 			pl.figtext(base_y, base_x-0.05*i, '{} -> [{}]'.format(x1, x2))
-			
+	
+	def feature_label(self, data):
+		f = data[0]
+		s = data[1]
+		base_x = 0.88
+		base_y = 0.74
+		for i in range(0, len(data[0])):
+			 pl.figtext(base_y, base_x-0.05*i, '{} -> {}'.format(f[i], s[i]))
+	
+	def feature_label_all(self):
+		f = list(range(1, 9))
+		self.feature_label((f,all_feature))		
 
+class OrginModel(BaseMethod):
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
+	
+	def process(self):
+		x_ax = list(range(1, 9))
+		pl.title('Origin Model')
+		self.feature_label_all()
+		for data in self.x:
+			pl.plot(x_ax, data)
+		pl.show()
+	
 class BruteForce(BaseMethod):
 	feature_lst = '01234567'
 
@@ -167,36 +193,26 @@ class BruteForce(BaseMethod):
 		else:
 			range_method = range(8, 0, -1)
 
-		rmse = {('2', '3'): 2.998908694034462, ('1', '2', '3', '6'): 2.9824911873277555, ('0', '1', '2', '3', '4', '6', '7'): 3.1242675082609561, ('2', '3', '7'): 2.972872439257729, ('2', '3', '4', '6', '7'): 3.0894996655293645, ('2',): 3.564004441576142, ('1', '2', '3', '4', '6', '7'): 3.0818087234906884, ('0', '1', '2', '3', '4', '5', '6', '7'): 3.2440301459082304}
-
+# 		rmse = {('2', '3'): 2.998908694034462, ('1', '2', '3', '6'): 2.9824911873277555, ('0', '1', '2', '3', '4', '6', '7'): 3.1242675082609561, ('2', '3', '7'): 2.972872439257729, ('2', '3', '4', '6', '7'): 3.0894996655293645, ('2',): 3.564004441576142, ('1', '2', '3', '4', '6', '7'): 3.0818087234906884, ('0', '1', '2', '3', '4', '5', '6', '7'): 3.2440301459082304}
+		rmse = self.compute_selection(range_method)
 		v_rmse = rmse.values()
 		key_rmse = rmse.keys()
 		min_rmse = min(v_rmse)
 		index_min = v_rmse.index(min_rmse)
 		feature = key_rmse[index_min]
 		feature_list = [int(x) for x in list(feature)]
+		
 		feature_tran = transpose(self.x)
 		f_temp = feature_tran[feature_list]
-		f_select = transpose(f_temp)
-		print list(f_select)
-		# pl.plot(list(f_select), list(range(0,4)))
-		# pl.show()
-		# print list(f_select)[0][0]
-		# print len(feature_tran)
-
-		# f_select = transpose(feature_tran[feature_list])
-		# x_ax = list(range(0, len(feature_list)))
-		# print 'select ', len(f_select[0]), ' x ', x_ax
-		# pl.plot(f_select, x_ax)
-		# pl.show()
-		# print 'fe', f_select
-		# print feature_list
-		# print feature_list
-		# print 'min : ', min_rmse, ' i : ',i_rmse
-		# print rmse
-
-
-
+		f_select = transpose(f_temp).tolist()
+		x_ax = list(range(1, len(feature_list)+1))
+		
+		f_label = list(range(1, len(feature_list)+1))
+		s_label = all_feature[feature_list]
+		self.feature_label((f_label, s_label))
+		for p in f_select:
+			pl.plot(x_ax, p)
+		pl.show()
 
 
 class Chi2(BaseMethod):
@@ -254,11 +270,25 @@ class Chi2(BaseMethod):
 			pl.figtext(base_y, base_x-0.05*7, '7 - tags')
 		pl.show()
 
-	def create_new_model(self):
-		pass
+	def create_new_model(self, k_num=4):
+		x_new = SelectKBest(chi2, k=k_num).fit_transform(self.x ,self.y)
+		print 'x new ', x_new
+		np_x, np_x_new = self.transpose_array(self.x, x_new)
+		i_select = self.get_select(np_x, np_x_new)
+		
+# 		print np_x_new
+		
+		f_label = list(range(1, len(i_select)+1))
+		s_label = all_feature[i_select]
+		self.feature_label((f_label, s_label))
+		
+		for i in x_new:
+		 	pl.plot(f_label, i)
+		pl.show()
+		
 
 def load_data():
-	x = loadtxt('fselect.txt', delimiter=',', dtype=int)
+	x = loadtxt('vmodel.txt', delimiter=',', dtype=int)
 	y = loadtxt('fresult.txt', dtype=int)
 	return x,y
 
