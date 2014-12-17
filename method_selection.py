@@ -160,6 +160,20 @@ class BruteForce(BaseMethod):
 		pl.title('Brute force')
 		pl.show()
 
+	def create_new_model(self, mtype, k):
+		range_method = ''
+		if mtype == 'forward':
+			range_method = range(1, 9)
+		else:
+			range_method = range(8, 0, -1)
+
+		rmse = self.compute_selection(range_method)
+		print 'k : ', k
+		print rmse
+
+
+
+
 
 class Chi2(BaseMethod):
 
@@ -216,11 +230,14 @@ class Chi2(BaseMethod):
 			pl.figtext(base_y, base_x-0.05*7, '7 - tags')
 		pl.show()
 
+	def create_new_model(self):
+		pass
+
 def load_data():
 	x = loadtxt('fselect.txt', delimiter=',', dtype=int)
 	y = loadtxt('fresult.txt', dtype=int)
 	return x,y
 
-x,y = load_data()
-bf = BruteForce(x, y)
-bf.backward()
+# x,y = load_data()
+# bf = BruteForce(x, y)
+# bf.backward()
