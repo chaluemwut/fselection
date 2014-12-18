@@ -5,7 +5,6 @@ from sklearn.cross_validation import *
 from sklearn.metrics import mean_squared_error
 from sklearn import svm
 import itertools
-from googleapiclient.model import BaseModel
 
 default_k = 4
 all_feature = array(['location', 'shares', 'comments', 'like', 'vdo', 'images', 'url', 'tags'])
