@@ -16,6 +16,20 @@ def plot_all(x, y):
 		pl.scatter(new_x[i, 0], new_x[i, 1], color=l_color)
 	pl.show()
 
+def plot_2(x, y):
+	pca = PCA(n_components=2)
+	new_x = pca.fit(x).transform(x)
+	for i in range(0, len(new_x)):
+		cred_class = y[i]
+		l_color = ''
+		if cred_class >= 5:
+			l_color = 'red'
+		else:
+			l_color = 'green'
+		# l_color = color_list[y[i]]
+		pl.scatter(new_x[i, 0], new_x[i, 1], color=l_color)
+	pl.show()	
+
 def plot_10(x, y):
 	fig = pl.figure()
 	pca = PCA(n_components=2)
@@ -57,7 +71,7 @@ def plot_10(x, y):
 	pl.show()
 
 x, y = load_data()
-plot_all(x, y)
+plot_2(x, y)
 # fig = pl.figure()
 # ax1 = fig.add_subplot(211)
 # ax1.plot([(1, 2), (3, 4)], [(4, 3), (2, 3)])
